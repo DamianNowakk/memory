@@ -23,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class MenuActivity extends AppCompatActivity {
-    private Button start_btn, sendButton;
+    private Button start_btn, sendButton, scoreButton;
     private EditText editLogin;
     private TextView gameID;
     private static String serverIP = "http://192.168.0.2:8080";
@@ -108,6 +108,16 @@ public class MenuActivity extends AppCompatActivity {
 
     public void OnClickButtonListener()
     {
+        scoreButton = (Button)findViewById(R.id.button2);
+        scoreButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getScore("2");
+                    }
+                }
+        );
+
         start_btn = (Button)findViewById(R.id.btn_start);
         start_btn.setOnClickListener(
                 new View.OnClickListener() {
@@ -124,10 +134,20 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        new AsyncCaller().execute(gameScoreUrl, "6");
+                        getGameForUser();
                     }
                 }
         );
+    }
+
+    private void getScore(String gameID) {
+        new AsyncCaller().execute(gameScoreUrl, gameID);
+    }
+
+    private void getGameForUser() {
+        playerID = editLogin.getText().toString();
+        //parse text
+        new AsyncCaller().execute(getGameUrl, playerID);
     }
 
     public void OnClickEditTextListener()

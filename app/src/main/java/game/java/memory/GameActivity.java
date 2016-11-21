@@ -1,6 +1,7 @@
 package game.java.memory;
 
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,14 +17,27 @@ import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
 
-    ArrayList<Button> txt = new ArrayList<Button>();
-    TableLayout tl;
-    TextView tura;
-    TextView yourScore;
-    TextView oppScore;
+    public enum GameMoves { TEST, TEST2 }
+
+    private ArrayList<Button> txt = new ArrayList<Button>();
+    private TableLayout tl;
+    private TextView tura;
+    private TextView yourScore;
+    private TextView oppScore;
+
+    int id;
+    int player;
+    Thread game = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle b = getIntent().getExtras();
+        if(b != null) {
+            id = b.getInt("gameId");
+            player = b.getInt("player");
+        }
 
         tura = (TextView)findViewById(R.id.tura);
         yourScore = (TextView)findViewById(R.id.your_score);
@@ -46,7 +60,27 @@ public class GameActivity extends AppCompatActivity {
         }
         tl.requestLayout();
 
+        game = new Thread() {
+            public void run() {
+                game();
+            }
+        };
+        game.start();
     }
+
+    final Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            if(msg.what== GameMoves.TEST.ordinal())
+            {
+                Toast.makeText(getBaseContext(), "start", Toast.LENGTH_SHORT).show();
+            }
+            if(msg.what== GameMoves.TEST2.ordinal())
+            {
+                Toast.makeText(getBaseContext(), "stop", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     private void setOnClick(final Button btn, final int x, final int y){
         btn.setOnClickListener(new View.OnClickListener() {
@@ -55,5 +89,44 @@ public class GameActivity extends AppCompatActivity {
                 Toast.makeText(getBaseContext(),x + " " + y, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private long countTimeElapsed(long startTime) {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    private void game()
+    {
+        while(true)
+        {
+            if(true)//GetActivePlayer/{gameId} == player
+            {
+                showOppMove();
+                makeMove();
+            }
+
+
+        }
+    }
+
+    private void showOppMove()
+    {
+        //GetNotShownMoves/{gameId}
+        Message msg = handler.obtainMessage();
+        msg.what = GameMoves.TEST.ordinal();
+        handler.sendMessage(msg);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        msg = handler.obtainMessage();
+        msg.what = GameMoves.TEST2.ordinal();
+        handler.sendMessage(msg);
+    }
+
+    private void makeMove()
+    {
+
     }
 }

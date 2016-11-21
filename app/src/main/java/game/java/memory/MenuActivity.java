@@ -26,7 +26,7 @@ public class MenuActivity extends AppCompatActivity {
     private Button start_btn, sendButton, scoreButton;
     private EditText editLogin;
     private TextView gameID;
-    private static String serverIP = "http://192.168.0.2:8080";
+    private static String serverIP = "http://192.168.0.22:8080";
     private static String service = "/MemoryService_war_exploded/MemoryService/";
     private static String getGameUrl = serverIP + service + "GetGame";
     private static String isMyTurnUrl = serverIP + service + "GetActivePlayer";
@@ -124,7 +124,12 @@ public class MenuActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent("game.java.memory.GameActivity");
+                        Bundle b = new Bundle();
+                        b.putInt("gameId", 1); //TO DO trzeba tu dac zmienna która przechowuje id gry   obie te watosci otrzymujemy z GetGame/
+                        b.putInt("player", 1); // tutaj dac zmienna jakim playerem jestemy 1 czy 2
+                        intent.putExtras(b);
                         startActivity(intent);
+                        finish();
                     }
                 }
         );

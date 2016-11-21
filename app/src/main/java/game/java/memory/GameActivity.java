@@ -1,13 +1,13 @@
 package game.java.memory;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -17,14 +17,20 @@ import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
 
-    public enum GameMoves { TEST, TEST2 }
+    public enum GameMoves { MOVE, STOPMOVE, CHANGETIME }
 
     private ArrayList<Button> txt = new ArrayList<Button>();
-    private TableLayout tl;
-    private TextView tura;
-    private TextView yourScore;
-    private TextView oppScore;
+    private static TableLayout tl;
+    private static TextView tura;
+    private static TextView yourScore;
+    private static TextView oppScore;
+    private static TextView time;
 
+    private boolean chanegePosition;
+    private int x;
+    private int y;
+
+    boolean endGame = false;
     int id;
     int player;
     Thread game = null;
@@ -32,6 +38,7 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_game);
 
         Bundle b = getIntent().getExtras();
         if(b != null) {
@@ -39,11 +46,15 @@ public class GameActivity extends AppCompatActivity {
             player = b.getInt("player");
         }
 
+        chanegePosition = false;
+        x = -1;
+        y = -1;
+
         tura = (TextView)findViewById(R.id.tura);
         yourScore = (TextView)findViewById(R.id.your_score);
         oppScore = (TextView)findViewById(R.id.opp_score);
+        time = (TextView)findViewById(R.id.time);
 
-        setContentView(R.layout.activity_game);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(1,android.widget.TableRow.LayoutParams.MATCH_PARENT,1f);
         Button btn;
         tl = (TableLayout) findViewById(R.id.map);
@@ -62,71 +73,151 @@ public class GameActivity extends AppCompatActivity {
 
         game = new Thread() {
             public void run() {
-                game();
+                game(this);
             }
         };
         game.start();
     }
 
+    @Override
+    public void onBackPressed() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                            exit();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void exit()
+    {
+        game.interrupt();
+        this.finish();
+    }
+
     final Handler handler = new Handler(){
         @Override
-        public void handleMessage(Message msg) {
-            if(msg.what== GameMoves.TEST.ordinal())
+        public void handleMessage(final Message msg) {
+            if(msg.what== GameMoves.MOVE.ordinal())
             {
-                Toast.makeText(getBaseContext(), "start", Toast.LENGTH_SHORT).show();
+
             }
-            if(msg.what== GameMoves.TEST2.ordinal())
+            if(msg.what== GameMoves.STOPMOVE.ordinal())
             {
-                Toast.makeText(getBaseContext(), "stop", Toast.LENGTH_SHORT).show();
+
+            }
+            if(msg.what== GameMoves.CHANGETIME.ordinal())
+            {
+                if(msg.arg1 == -1)
+                    time.setText("X");
+                else
+                    time.setText(Integer.toString(msg.arg1));
             }
         }
     };
+
+    private void sendHandler(GameMoves gameMoves, Object obj, int arg1, int arg2)
+    {
+        Message msg = handler.obtainMessage();
+        msg.what = gameMoves.ordinal();
+        msg.obj = obj;
+        msg.arg1 = arg1;
+        msg.arg2 = arg2;
+        handler.sendMessage(msg);
+    }
 
     private void setOnClick(final Button btn, final int x, final int y){
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getBaseContext(),x + " " + y, Toast.LENGTH_LONG).show();
+                if(isChanegePosition()) {
+                    setX(x);
+                    setY(y);
+                    Toast.makeText(getBaseContext(),x + " " + y, Toast.LENGTH_LONG).show();
+                }
+                setChanegePosition(false);
             }
         });
     }
 
-    private long countTimeElapsed(long startTime) {
-        return System.currentTimeMillis() - startTime;
-    }
-
-    private void game()
+    private void game(Thread thread)
     {
-        while(true)
+        while(!thread.isInterrupted())
         {
             if(true)//GetActivePlayer/{gameId} == player
             {
                 showOppMove();
                 makeMove();
             }
-
-
         }
     }
 
     private void showOppMove()
     {
         //GetNotShownMoves/{gameId}
-        Message msg = handler.obtainMessage();
-        msg.what = GameMoves.TEST.ordinal();
-        handler.sendMessage(msg);
+
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        msg = handler.obtainMessage();
-        msg.what = GameMoves.TEST2.ordinal();
-        handler.sendMessage(msg);
+    }
+
+    private long countTimeElapsed(long startTime) {
+        Long a = System.currentTimeMillis() - startTime;
+        return a/1000;
     }
 
     private void makeMove()
     {
+        Long startTime = System.currentTimeMillis();
+        setChanegePosition(true);
+        while (countTimeElapsed(startTime) < 5)
+        {
+            if((5-countTimeElapsed(startTime)) > 4) sendHandler(GameMoves.CHANGETIME, null, 5, 0);
+            else if((5-countTimeElapsed(startTime)) > 3) sendHandler(GameMoves.CHANGETIME, null, 4, 0);
+            else if((5-countTimeElapsed(startTime)) > 2) sendHandler(GameMoves.CHANGETIME, null, 3, 0);
+            else if((5-countTimeElapsed(startTime)) > 1) sendHandler(GameMoves.CHANGETIME, null, 2, 0);
+            else if((5-countTimeElapsed(startTime)) > 0) sendHandler(GameMoves.CHANGETIME, null, 1, 0);
+        }
+        sendHandler(GameMoves.CHANGETIME, null, -1, 0);
+        //wysylanie
+        setChanegePosition(false);
+        setX(-1);
+        setY(-1);
+    }
 
+    public synchronized int getY() {
+        return y;
+    }
+
+    public synchronized void setY(int y) {
+        this.y = y;
+    }
+
+    public synchronized int getX() {
+        return x;
+    }
+
+    public synchronized void setX(int x) {
+        this.x = x;
+    }
+
+    public synchronized boolean isChanegePosition() {
+        return chanegePosition;
+    }
+
+    public synchronized void setChanegePosition(boolean chanegePosition) {
+        this.chanegePosition = chanegePosition;
     }
 }

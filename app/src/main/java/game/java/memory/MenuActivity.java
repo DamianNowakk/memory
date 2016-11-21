@@ -129,7 +129,6 @@ public class MenuActivity extends AppCompatActivity {
                         b.putInt("player", 1); // tutaj dac zmienna jakim playerem jestemy 1 czy 2
                         intent.putExtras(b);
                         startActivity(intent);
-                        finish();
                     }
                 }
         );

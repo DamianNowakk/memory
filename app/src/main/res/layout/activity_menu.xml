@@ -19,4 +19,32 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="62dp"
         android:id="@+id/btn_start" />
+
+    <TextView
+        android:text="Your ID:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textView"
+        android:layout_below="@+id/btn_start"
+        android:layout_centerHorizontal="true"
+        android:textStyle="normal|bold|italic" />
+
+    <EditText
+        android:text="Type your ID..."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="11dp"
+        android:id="@+id/editText"
+        android:layout_below="@+id/textView"
+        android:layout_alignEnd="@+id/textView" />
+
+    <Button
+        android:text="SEND"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendButton"
+        android:layout_alignBottom="@+id/editText"
+        android:layout_toEndOf="@+id/btn_start"
+        android:textSize="14sp" />
 </RelativeLayout>

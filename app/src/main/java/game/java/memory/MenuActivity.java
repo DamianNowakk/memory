@@ -27,12 +27,12 @@ public class MenuActivity extends AppCompatActivity {
     private EditText editLogin;
     private TextView gameID;
     private static String serverIP = "http://192.168.0.2:8080";
-    private static String server = "/MemoryService_war_exploded/MemoryService/";
-    private static String getGameUrl = serverIP + server + "GetGame";
-    private static String isMyTurnUrl = serverIP + server + "GetActivePlayer";
-    private static String makeMoveUrl = serverIP + server + "MakeMove";
-    private static String opponentMovesUrl = serverIP + server + "GetNotShownMoves";
-    private static String gameScoreUrl = serverIP + server + "GetGameScore";
+    private static String service = "/MemoryService_war_exploded/MemoryService/";
+    private static String getGameUrl = serverIP + service + "GetGame";
+    private static String isMyTurnUrl = serverIP + service + "GetActivePlayer";
+    private static String makeMoveUrl = serverIP + service + "MakeMove";
+    private static String opponentMovesUrl = serverIP + service + "GetNotShownMoves";
+    private static String gameScoreUrl = serverIP + service + "GetGameScore";
     private String playerID;
 
     @Override
@@ -45,6 +45,8 @@ public class MenuActivity extends AppCompatActivity {
 
     private class AsyncCaller extends AsyncTask<String, Void, JSONObject>
     {
+        String requestedUrl;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -55,6 +57,8 @@ public class MenuActivity extends AppCompatActivity {
 
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
+            requestedUrl = params[0];
+
             String url = "";
             for(int i = 0; i < params.length; i++)
             {
@@ -72,7 +76,10 @@ public class MenuActivity extends AppCompatActivity {
             super.onPostExecute(result);
             //this method will be running on UI thread
 
-            doSomethingImportantWithJSON(result);
+            if(requestedUrl == getGameUrl)
+                doSomethingImportantWithJSON(result);
+            else if(requestedUrl == gameScoreUrl)
+                thisIsMoreImportanter(result);
         }
     }
 
@@ -82,6 +89,18 @@ public class MenuActivity extends AppCompatActivity {
             String gameId = json.get("GameId").toString();
             String playerNo =  json.get("PlayerNo").toString();
             gameID.setText("Game id: " + gameId + ", playerNo: " + playerNo);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        };
+    }
+
+    private void thisIsMoreImportanter(JSONObject json)
+    {
+        gameID = (TextView) findViewById(R.id.textView);
+        try {
+            String player1Score = json.get("Player1Score").toString();
+            String player2Score =  json.get("Player2Score").toString();
+            gameID.setText("Player1: " + player1Score + ", player2: " + player2Score);
         } catch (JSONException e) {
             e.printStackTrace();
         };
@@ -105,7 +124,7 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        new AsyncCaller().execute(getGameUrl, "6");
+                        new AsyncCaller().execute(gameScoreUrl, "6");
                     }
                 }
         );

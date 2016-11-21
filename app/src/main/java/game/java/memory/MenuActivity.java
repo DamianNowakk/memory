@@ -27,6 +27,12 @@ public class MenuActivity extends AppCompatActivity {
     private EditText editLogin;
     private TextView gameID;
     private static String serverIP = "http://192.168.0.2:8080";
+    private static String server = "/MemoryService_war_exploded/MemoryService/";
+    private static String getGameUrl = serverIP + server + "GetGame";
+    private static String isMyTurnUrl = serverIP + server + "GetActivePlayer";
+    private static String makeMoveUrl = serverIP + server + "MakeMove";
+    private static String opponentMovesUrl = serverIP + server + "GetNotShownMoves";
+    private static String gameScoreUrl = serverIP + server + "GetGameScore";
     private String playerID;
 
     @Override
@@ -35,48 +41,50 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         OnClickButtonListener();
         OnClickEditTextListener();
-
     }
 
-    private class AsyncCaller extends AsyncTask<Void, Void, Void>
+    private class AsyncCaller extends AsyncTask<String, Void, JSONObject>
     {
-        String textResult;
-        String player;
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             //this method will be running on UI thread
         }
         @Override
-        protected Void doInBackground(Void... params) {
+        protected JSONObject doInBackground(String... params) {
 
             //this method will be running on background thread so don't update UI frome here
             //do your long running http tasks here,you dont want to pass argument and u can access the parent class' variable url over here
-            JSONParser jsonParser = new JSONParser();
-            JSONObject payload = jsonParser.getJSONFromUrl(
-                    serverIP + "/MemoryService_war_exploded/MemoryService/GetGame/6",
-                    null);
-            try {
-
-                textResult = payload.get("GameId").toString();
-                player = payload.get("PlayerNo").toString();
-
-            } catch (JSONException e) {
-                e.printStackTrace();
+            String url = "";
+            for(int i = 0; i < params.length; i++)
+            {
+                url += params[i] + "/";
             }
 
-            return null;
+            JSONParser jsonParser = new JSONParser();
+            JSONObject json = jsonParser.getJSONFromUrl(url, null);
+
+            return json;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(JSONObject result) {
             super.onPostExecute(result);
             //this method will be running on UI thread
-            gameID = (TextView) findViewById(R.id.textView);
-            gameID.setText("Game id = " + textResult + ", playerNo = " + player);
-        }
 
+            doSomethingImportantWithJSON(result);
+        }
+    }
+
+    private void doSomethingImportantWithJSON(JSONObject json) {
+        gameID = (TextView) findViewById(R.id.textView);
+        try {
+            String gameId = json.get("GameId").toString();
+            String playerNo =  json.get("PlayerNo").toString();
+            gameID.setText("Game id: " + gameId + ", playerNo: " + playerNo);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        };
     }
 
     public void OnClickButtonListener()
@@ -97,7 +105,7 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        new AsyncCaller().execute();
+                        new AsyncCaller().execute(getGameUrl, "6");
                     }
                 }
         );

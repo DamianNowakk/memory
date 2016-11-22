@@ -325,7 +325,7 @@ public class GameActivity extends AppCompatActivity {
             getNoShownMoves = getNoShownMovesList.get(i);
             sendHandler(GameMoves.MOVEOPP, getNoShownMoves, 0, 0);
             try {
-                Thread.sleep(2000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -362,6 +362,7 @@ public class GameActivity extends AppCompatActivity {
             if(getX1() == -1 || getY1() == -1 || getX2() == -1 || getY2() == -1)
             {
                 Random generator = new Random();
+                Button b,a;
                 int x1=-1, y1=-1;
                 int x2=-1, y2=-1;
                 int max = 0;
@@ -400,7 +401,19 @@ public class GameActivity extends AppCompatActivity {
                         }
                     }
                     max++;
-                }while(x1 == x2 && y1 == y2 && buttonArray[x1][y1] == null && buttonArray[x2][y2] == null );
+                    a = buttonArray[x1][y1];
+                    b = buttonArray[x2][y2];
+                    if(x1 != x2)
+                        if(y1 != y2)
+                            if(buttonArray[x1][y1] != null)
+                                if(buttonArray[x2][y2] != null)
+                                    break;;
+
+                }while(true);
+                if(a == null)
+                    a = b;
+                if(b == null)
+                    a = b;
                 makeMove = WebAPI.makeMove(player, gameId, x1, y1, x2, y2);
             }
             else

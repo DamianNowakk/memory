@@ -21,7 +21,7 @@ import game.java.memory.containers.MakeMove;
 public class WebAPI {
 
     public static String IP = "";
-    public static String HOME = "http://10.0.2.2:9999/MemoryService_war_exploded/MemoryService/";
+    public static String HOME = "http://"+"/MemoryService_war_exploded/MemoryService/";
     private static String GETGAME = HOME + "GetGame";
     private static String GETACTIVEPLAYER = HOME + "GetActivePlayer";
     private static String GETGAMESCORE = HOME + "GetGameScore";
@@ -30,6 +30,11 @@ public class WebAPI {
 
     public static void setHome(String ip){
         HOME = "http://" + ip + "/MemoryService_war_exploded/MemoryService/";
+        GETGAME = HOME + "GetGame";
+        GETACTIVEPLAYER = HOME + "GetActivePlayer";
+        GETGAMESCORE = HOME + "GetGameScore";
+        GETNOTSHOWNMOVES = HOME + "GetNotShownMoves";
+        MAKEMOVE = HOME + "MakeMove";
     }
 
 

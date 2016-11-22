@@ -77,4 +77,41 @@
         android:textAlignment="center"
         android:layout_marginTop="15dp" />
 
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/iptextview"
+                android:text="Ip:" />
+            <EditText
+                android:layout_width="195dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:text="10.0.2.2"
+                android:ems="10"
+                android:id="@+id/IP" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/porttextview"
+                android:text="Port::" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/PORT"
+                android:text="9999" />
+        </TableRow>
+    </TableLayout>
+
 </LinearLayout>

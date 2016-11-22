@@ -70,6 +70,10 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        EditText ip = (EditText) findViewById(R.id.IP);
+                        EditText port = (EditText) findViewById(R.id.PORT);
+                        WebAPI.setHome(ip.getText() + ":" + port.getText());
+                        Log.d("Stworzone ip: ", WebAPI.HOME);
                         getGame = null;
                         String login = editLogin.getText().toString();
                         if (login.trim().length() > 0) {

@@ -344,19 +344,19 @@ public class GameActivity extends AppCompatActivity {
 
         Long startTime = System.currentTimeMillis();
         setChanegePosition(true);
-        while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
-            if ((5 - countTimeElapsed(startTime)) > 4)
-                sendHandler(GameMoves.CHANGETIME, null, 5, 0);
-            else if ((5 - countTimeElapsed(startTime)) > 3)
-                sendHandler(GameMoves.CHANGETIME, null, 4, 0);
-            else if ((5 - countTimeElapsed(startTime)) > 2)
-                sendHandler(GameMoves.CHANGETIME, null, 3, 0);
-            else if ((5 - countTimeElapsed(startTime)) > 1)
-                sendHandler(GameMoves.CHANGETIME, null, 2, 0);
-            else if ((5 - countTimeElapsed(startTime)) > 0)
-                sendHandler(GameMoves.CHANGETIME, null, 1, 0);
-        }
-        sendHandler(GameMoves.CHANGETIME, null, -1, 0);
+//        while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
+//            if ((5 - countTimeElapsed(startTime)) > 4)
+//                sendHandler(GameMoves.CHANGETIME, null, 5, 0);
+//            else if ((5 - countTimeElapsed(startTime)) > 3)
+//                sendHandler(GameMoves.CHANGETIME, null, 4, 0);
+//            else if ((5 - countTimeElapsed(startTime)) > 2)
+//                sendHandler(GameMoves.CHANGETIME, null, 3, 0);
+//            else if ((5 - countTimeElapsed(startTime)) > 1)
+//                sendHandler(GameMoves.CHANGETIME, null, 2, 0);
+//            else if ((5 - countTimeElapsed(startTime)) > 0)
+//                sendHandler(GameMoves.CHANGETIME, null, 1, 0);
+//        }
+//        sendHandler(GameMoves.CHANGETIME, null, -1, 0);
         MakeMove makeMove = null;
         try {
             if(getX1() == -1 || getY1() == -1 || getX2() == -1 || getY2() == -1)
@@ -381,14 +381,14 @@ public class GameActivity extends AppCompatActivity {
                                 {
                                     if(max==0)
                                     {
-                                        x1= x;
-                                        y1 =y;
+                                        x1 = x;
+                                        y1 = y;
                                         max++;
                                     }
                                     else
                                     {
-                                        x2= x;
-                                        y2 =y;
+                                        x2 = x;
+                                        y2 = y;
                                         max++;
                                         break;
                                     }
@@ -400,7 +400,7 @@ public class GameActivity extends AppCompatActivity {
                         }
                     }
                     max++;
-                }while(x1 == x2 && y1 == y2 && buttonArray[x1][y1] != null && buttonArray[x2][y2] != null );
+                }while(x1 == x2 && y1 == y2 && buttonArray[x1][y1] == null && buttonArray[x2][y2] == null );
                 makeMove = WebAPI.makeMove(player, gameId, x1, y1, x2, y2);
             }
             else
@@ -409,7 +409,7 @@ public class GameActivity extends AppCompatActivity {
             }
 
             sendHandler(GameMoves.MOVE, makeMove, 0, 0);
-            Thread.sleep(2000);
+            Thread.sleep(200);
             sendHandler(GameMoves.STOPMOVE, makeMove, 0, 0);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -436,7 +436,7 @@ public class GameActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         sendHandler(GameMoves.SCORE, null, getGameScore.player1Score, getGameScore.player2Score);
-        if (getActivePlayer.playerID == player)//getActivePlayer.playerID == player
+        if (getActivePlayer.playerID == player)
         {
             makeMove();
         }

@@ -277,6 +277,16 @@ public class GameActivity extends AppCompatActivity {
     private void game(Thread thread)
     {
         GetActivePlayer getActivePlayer = null;
+        try {
+            getActivePlayer = WebAPI.getActivePlayer(gameId);
+            sendHandler(GameMoves.TURA, null, getActivePlayer.playerID, 0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while(!thread.isInterrupted())
         {
             try {
@@ -417,7 +427,7 @@ public class GameActivity extends AppCompatActivity {
             }
 
             sendHandler(GameMoves.MOVE, makeMove, 0, 0);
-            Thread.sleep(200);
+            Thread.sleep(2000);
             sendHandler(GameMoves.STOPMOVE, makeMove, 0, 0);
         } catch (JSONException e) {
             e.printStackTrace();

@@ -20,7 +20,7 @@ import game.java.memory.containers.MakeMove;
 
 public class WebAPI {
 
-    private static String HOME = "http://192.168.0.22:8080/MemoryService_war_exploded/MemoryService/";
+    public static String HOME = "http://192.168.0.2:8080/MemoryService_war_exploded/MemoryService/";
     private static String GETGAME = HOME + "GetGame";
     private static String GETACTIVEPLAYER = HOME + "GetActivePlayer";
     private static String GETGAMESCORE = HOME + "GetGameScore";

@@ -14,10 +14,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import game.java.memory.containers.GetActivePlayer;
 import game.java.memory.containers.GetGame;
 import game.java.memory.containers.GetGameScore;
+import game.java.memory.containers.GetNoShownMoves;
 import game.java.memory.containers.MakeMove;
 
 public class MenuActivity extends AppCompatActivity {
@@ -39,21 +42,29 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         OnClickButtonListener();
         OnClickEditTextListener();
-//        try {
-//            GetGame getGame = WebAPI.getGame(1);
-//            GetGameScore getGameScore = WebAPI.getGameScore(1);
-//            MakeMove makeMove = WebAPI.makeMove(1,1,1,1,1,1);
-//            TextView textView = (TextView)findViewById(R.id.textView2);
-//            textView.append(getGame.toString() + "\n");
-//            textView.append(getGameScore.toString() + "\n");
-//            textView.append(makeMove.toString());
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            GetGame getGame = WebAPI.getGame(1);
+            GetGameScore getGameScore = WebAPI.getGameScore(1);
+            MakeMove makeMove = WebAPI.makeMove(1,1,1,1,1,1);
+            WebAPI.makeMove(1,1,1,1,2,1);
+            WebAPI.makeMove(1,1,1,1,2,3);
+            GetActivePlayer getActivePlayer = WebAPI.getActivePlayer(1);
+            List<GetNoShownMoves> getNoShownMoves = WebAPI.getNotShownMoves(1);
+            TextView textView = (TextView)findViewById(R.id.textView2);
+            textView.append(getGame.toString() + "\n");
+            textView.append(getGameScore.toString() + "\n");
+            textView.append(makeMove.toString() + "\n");
+            textView.append(getActivePlayer.toString() + "\n");
+            for(GetNoShownMoves getNoShownMoves1 : getNoShownMoves) {
+                textView.append(getNoShownMoves1.toString() + "; \n");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private class AsyncCaller extends AsyncTask<String, Void, JSONObject>
@@ -152,6 +163,7 @@ public class MenuActivity extends AppCompatActivity {
                         b.putInt("player", getGame.playerNumber);
                         intent.putExtras(b);
                         startActivity(intent);
+                        finish();
                     }
                 }
         );

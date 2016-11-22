@@ -383,14 +383,20 @@ public class GameActivity extends AppCompatActivity {
                                     {
                                         x1= x;
                                         y1 =y;
+                                        max++;
                                     }
                                     else
                                     {
                                         x2= x;
                                         y2 =y;
+                                        max++;
+                                        break;
                                     }
+
                                 }
                             }
+                            if(max==2)
+                                break;
                         }
                     }
                     max++;

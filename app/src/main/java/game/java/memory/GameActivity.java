@@ -129,14 +129,18 @@ public class GameActivity extends AppCompatActivity {
             }
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener).setNegativeButton("No", dialogClickListener).show();
+        builder.setMessage("Poddac sie ?").setPositiveButton("Tak", dialogClickListener).setNegativeButton("Nie", dialogClickListener).show();
     }
+
+
 
     private void exit()
     {
         game.interrupt();
         this.finish();
     }
+
+
 
     final Handler handler = new Handler(){
         @Override
@@ -167,11 +171,11 @@ public class GameActivity extends AppCompatActivity {
                 {
                     if(player == 1) {
                         setScorePlayer1(getScorePlayer1() + 1);
-                        yourScore.setText(Integer.toString(getScorePlayer2()));
+                        yourScore.setText(Integer.toString(getScorePlayer1()));
                     }
                     else {
                         setScorePlayer2(getScorePlayer2() + 1);
-                        oppScore.setText(Integer.toString(getScorePlayer1()));
+                        yourScore.setText(Integer.toString(getScorePlayer2()));
                     }
                     buttonArray[makeMove.x1][makeMove.y1] = null;
                     buttonArray[makeMove.x2][makeMove.y2] = null;
@@ -202,12 +206,13 @@ public class GameActivity extends AppCompatActivity {
                 {
                     if(player == 2) {
                         setScorePlayer1(getScorePlayer1() + 1);
-                        yourScore.setText(Integer.toString(getScorePlayer2()));
+                        oppScore.setText(Integer.toString(getScorePlayer1()));
                     }
                     else {
                         setScorePlayer2(getScorePlayer2() + 1);
-                        oppScore.setText(Integer.toString(getScorePlayer1()));
+                        oppScore.setText(Integer.toString(getScorePlayer2()));
                     }
+
                     buttonArray[makeMove.x1][makeMove.y1] = null;
                     buttonArray[makeMove.x2][makeMove.y2] = null;
                 }
@@ -355,7 +360,7 @@ public class GameActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             showOppMove();
-            if(true)//getActivePlayer.playerID == 0 getScorePlayer1() + getScorePlayer2() == 18
+            if(getScorePlayer1() + getScorePlayer2() == 18)//getActivePlayer.playerID == 0
             {
                 sendHandler(GameMoves.END, null, 0, 0);
                 break;
@@ -423,6 +428,7 @@ public class GameActivity extends AppCompatActivity {
             else if ((5 - countTimeElapsed(startTime)) > 0)
                 sendHandler(GameMoves.CHANGETIME, null, 1, 0);
         }
+        setChanegePosition(false);
         sendHandler(GameMoves.CHANGETIME, null, -1, 0);
         MakeMove makeMove = null;
         try {
@@ -492,7 +498,6 @@ public class GameActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        setChanegePosition(false);
         setX1(-1);
         setY1(-1);
         setX2(-1);

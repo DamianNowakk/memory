@@ -4,23 +4,21 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.concurrent.ExecutionException;
+
+import game.java.memory.containers.GetGame;
+import game.java.memory.containers.GetGameScore;
+import game.java.memory.containers.MakeMove;
 
 public class MenuActivity extends AppCompatActivity {
     private Button start_btn, sendButton, scoreButton;
@@ -41,6 +39,21 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         OnClickButtonListener();
         OnClickEditTextListener();
+        try {
+            GetGame getGame = WebAPI.getGame(1);
+            GetGameScore getGameScore = WebAPI.getGameScore(1);
+            MakeMove makeMove = WebAPI.makeMove(1,1,1,1,1,1);
+            TextView textView = (TextView)findViewById(R.id.textView2);
+            textView.append(getGame.toString() + "\n");
+            textView.append(getGameScore.toString() + "\n");
+            textView.append(makeMove.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private class AsyncCaller extends AsyncTask<String, Void, JSONObject>

@@ -24,11 +24,11 @@
         android:textStyle="normal|bold|italic" />
 
     <EditText
-        android:text="Type your ID..."
+        android:hint="Type your ID..."
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:id="@+id/editText"
+        android:id="@+id/id"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
 

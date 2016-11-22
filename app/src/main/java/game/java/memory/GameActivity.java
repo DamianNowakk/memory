@@ -1,5 +1,6 @@
 package game.java.memory;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -18,14 +20,20 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
+import game.java.memory.containers.GetActivePlayer;
+import game.java.memory.containers.GetGameScore;
+import game.java.memory.containers.GetNoShownMoves;
 import game.java.memory.containers.MakeMove;
 
 public class GameActivity extends AppCompatActivity {
 
-    public enum GameMoves { MOVE, STOPMOVE, CHANGETIME, TURA }
-
+    public enum GameMoves { MOVE, STOPMOVE, MOVEOPP, STOPMOVEOPP, CHANGETIME, TURA, SCORE, END }
+    private Activity activity = this;
     Button[][] buttonArray;
     private static TableLayout tl;
     private static TextView tura;
@@ -48,7 +56,7 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Bundle b = getIntent().getExtras();
         if(b != null) {
             gameId = b.getInt("gameId");
@@ -143,12 +151,89 @@ public class GameActivity extends AppCompatActivity {
                 }
 
             }
+            if(msg.what== GameMoves.MOVEOPP.ordinal())
+            {
+                GetNoShownMoves makeMove = (GetNoShownMoves)msg.obj;
+                buttonArray[makeMove.x1][makeMove.y1].setText(Integer.toString(makeMove.value1));
+                buttonArray[makeMove.x2][makeMove.y2].setText(Integer.toString(makeMove.value2));
+                buttonArray[makeMove.x1][makeMove.y2].getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
+                buttonArray[makeMove.x2][makeMove.y2].getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
+            }
+            if(msg.what== GameMoves.STOPMOVEOPP.ordinal())
+            {
+                GetNoShownMoves makeMove = (GetNoShownMoves)msg.obj;
+                Button btn1 = buttonArray[makeMove.x1][makeMove.y1];
+                Button btn2 = buttonArray[makeMove.x2][makeMove.y2];
+                btn1.getBackground().clearColorFilter();
+                btn2.getBackground().clearColorFilter();
+                if(btn1.getText().equals(btn2.getText()))
+                {
+                    buttonArray[makeMove.x1][makeMove.y1] = null;
+                    buttonArray[makeMove.x2][makeMove.y2] = null;
+                }
+                else
+                {
+                    btn1.setText("");
+                    btn2.setText("");
+                }
+
+            }
             if(msg.what== GameMoves.CHANGETIME.ordinal())
             {
                 if(msg.arg1 == -1)
                     time.setText("X");
                 else
                     time.setText(Integer.toString(msg.arg1));
+            }
+            if(msg.what== GameMoves.TURA.ordinal())
+            {
+                if(msg.arg1 == player)
+                {
+                    tura.setText("Tura: twoja");
+                }
+                else
+                {
+                    tura.setText("Tura: przeciwnika");
+                }
+            }
+            if(msg.what== GameMoves.SCORE.ordinal())
+            {
+                if(msg.arg1 == player)
+                {
+                    yourScore.setText(Integer.toString(msg.arg1));
+                    oppScore.setText(Integer.toString(msg.arg2));
+                }
+                else
+                {
+                    yourScore.setText(Integer.toString(msg.arg2));
+                    oppScore.setText(Integer.toString(msg.arg1));
+                }
+            }
+            if(msg.what== GameMoves.END.ordinal())
+            {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                exit();
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                if(Integer.getInteger(yourScore.getText().toString()) > Integer.getInteger(oppScore.getText().toString()))
+                {
+                    builder.setMessage("You win").setPositiveButton("Ok", dialogClickListener).show();
+                }
+                else if(Integer.getInteger(yourScore.getText().toString()) < Integer.getInteger(oppScore.getText().toString()))
+                {
+                    builder.setMessage("You lose").setPositiveButton("Ok", dialogClickListener).show();
+                }
+                else
+                {
+                    builder.setMessage("draw").setPositiveButton("Ok", dialogClickListener).show();
+                }
             }
         }
     };
@@ -187,25 +272,64 @@ public class GameActivity extends AppCompatActivity {
 
     private void game(Thread thread)
     {
+        GetActivePlayer getActivePlayer = null;
         while(!thread.isInterrupted())
         {
-            if(true)//GetActivePlayer/{gameId} == player
+            try {
+                getActivePlayer = WebAPI.getActivePlayer(gameId);
+                sendHandler(GameMoves.TURA, null, getActivePlayer.playerID, 0);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(getActivePlayer.playerID == player)//getActivePlayer.playerID == player
             {
                 showOppMove();
                 makeMove();
+            }
+            else if(getActivePlayer.playerID == 0)
+            {
+                sendHandler(GameMoves.END, null, 0, 0);
+                break;
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
 
     private void showOppMove()
     {
-        //GetNotShownMoves/{gameId}
-
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        List<GetNoShownMoves> getNoShownMovesList = null;
+        GetGameScore getGameScore = null;
+        try {
+            getNoShownMovesList = WebAPI.getNotShownMoves(gameId);
+            getGameScore = WebAPI.getGameScore(gameId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        GetNoShownMoves getNoShownMoves;
+        for(int i = 0; i < getNoShownMovesList.size(); i++)
+        {
+            getNoShownMoves = getNoShownMovesList.get(i);
+            sendHandler(GameMoves.MOVE, getNoShownMoves, 0, 0);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sendHandler(GameMoves.STOPMOVE, getNoShownMoves, 0, 0);
+        }
+        sendHandler(GameMoves.SCORE, null, getGameScore.player1Score, getGameScore.player2Score);
     }
 
     private long countTimeElapsed(long startTime) {
@@ -214,6 +338,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void makeMove() {
+        sendHandler(GameMoves.TURA, null, player, 0);
+
         Long startTime = System.currentTimeMillis();
         setChanegePosition(true);
         while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
@@ -231,9 +357,51 @@ public class GameActivity extends AppCompatActivity {
         sendHandler(GameMoves.CHANGETIME, null, -1, 0);
         MakeMove makeMove = null;
         try {
-            makeMove = WebAPI.makeMove(player, gameId, getX1(), getY1(), getX2(), getY2());
+            if(getX1() == -1 || getY1() == -1 || getX2() == -1 || getY2() == -1)
+            {
+                Random generator = new Random();
+                int x1=-1, y1=-1;
+                int x2=-1, y2=-1;
+                int max = 0;
+                do{
+                    if(max < 5) {
+                        x1 = generator.nextInt(6);
+                        x2 = generator.nextInt(6);
+                        y1 = generator.nextInt(6);
+                        y2 = generator.nextInt(6);
+                    }
+                    else
+                    {
+                        max =0;
+                        for (Integer y = 0; y < 6; y++) {
+                            for (Integer x = 0; x< 6; x++) {
+                                if(buttonArray[x][y] != null)
+                                {
+                                    if(max==0)
+                                    {
+                                        x1= x;
+                                        y1 =y;
+                                    }
+                                    else
+                                    {
+                                        x2= x;
+                                        y2 =y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    max++;
+                }while(x1 == x2 && y1 == y2 && buttonArray[x1][y1] != null && buttonArray[x2][y2] != null );
+                makeMove = WebAPI.makeMove(player, gameId, x1, y1, x2, y2);
+            }
+            else
+            {
+                makeMove = WebAPI.makeMove(player, gameId, getX1(), getY1(), getX2(), getY2());
+            }
+
             sendHandler(GameMoves.MOVE, makeMove, 0, 0);
-            Thread.sleep(5000);
+            Thread.sleep(2000);
             sendHandler(GameMoves.STOPMOVE, makeMove, 0, 0);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -247,13 +415,26 @@ public class GameActivity extends AppCompatActivity {
         setY1(-1);
         setX2(-1);
         setY2(-1);
-        if (false)//GetActivePlayer/{gameId} == player
+        GetActivePlayer getActivePlayer = null;
+        GetGameScore getGameScore = null;
+        try {
+            getActivePlayer = WebAPI.getActivePlayer(gameId);
+            getGameScore = WebAPI.getGameScore(gameId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        sendHandler(GameMoves.SCORE, null, getGameScore.player1Score, getGameScore.player2Score);
+        if (getActivePlayer.playerID == player)//getActivePlayer.playerID == player
         {
             makeMove();
         }
         else
         {
-            sendHandler(GameMoves.TURA, null, player, 0);
+            sendHandler(GameMoves.TURA, null, getActivePlayer.playerID, 0);
         }
     }
 

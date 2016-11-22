@@ -5,9 +5,6 @@ import android.os.AsyncTask;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/**
- * Created by 192 on 2016-11-22.
- */
 
 public class AsyncCaller2 extends AsyncTask<String, Void, JSONArray>
 {

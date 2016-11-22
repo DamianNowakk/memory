@@ -29,12 +29,14 @@ import game.java.memory.containers.GetActivePlayer;
 import game.java.memory.containers.GetGameScore;
 import game.java.memory.containers.GetNoShownMoves;
 import game.java.memory.containers.MakeMove;
+import game.java.memory.containers.Point;
 
 public class GameActivity extends AppCompatActivity {
 
     public enum GameMoves { MOVE, STOPMOVE, MOVEOPP, STOPMOVEOPP, CHANGETIME, TURA, SCORE, END }
     private Activity activity = this;
     Button[][] buttonArray;
+    ArrayList<Point> pointArrayList = new ArrayList<>();
     private static TableLayout tl;
     private static TextView tura;
     private static TextView yourScore;
@@ -279,7 +281,6 @@ public class GameActivity extends AppCompatActivity {
         {
             try {
                 getActivePlayer = WebAPI.getActivePlayer(gameId);
-                sendHandler(GameMoves.TURA, null, getActivePlayer.playerID, 0);
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -298,7 +299,7 @@ public class GameActivity extends AppCompatActivity {
                 break;
             }
             try {
-                Thread.sleep(200);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -325,7 +326,7 @@ public class GameActivity extends AppCompatActivity {
             getNoShownMoves = getNoShownMovesList.get(i);
             sendHandler(GameMoves.MOVEOPP, getNoShownMoves, 0, 0);
             try {
-                Thread.sleep(200);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -344,19 +345,19 @@ public class GameActivity extends AppCompatActivity {
 
         Long startTime = System.currentTimeMillis();
         setChanegePosition(true);
-//        while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
-//            if ((5 - countTimeElapsed(startTime)) > 4)
-//                sendHandler(GameMoves.CHANGETIME, null, 5, 0);
-//            else if ((5 - countTimeElapsed(startTime)) > 3)
-//                sendHandler(GameMoves.CHANGETIME, null, 4, 0);
-//            else if ((5 - countTimeElapsed(startTime)) > 2)
-//                sendHandler(GameMoves.CHANGETIME, null, 3, 0);
-//            else if ((5 - countTimeElapsed(startTime)) > 1)
-//                sendHandler(GameMoves.CHANGETIME, null, 2, 0);
-//            else if ((5 - countTimeElapsed(startTime)) > 0)
-//                sendHandler(GameMoves.CHANGETIME, null, 1, 0);
-//        }
-//        sendHandler(GameMoves.CHANGETIME, null, -1, 0);
+        while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
+            if ((5 - countTimeElapsed(startTime)) > 4)
+                sendHandler(GameMoves.CHANGETIME, null, 5, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 3)
+                sendHandler(GameMoves.CHANGETIME, null, 4, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 2)
+                sendHandler(GameMoves.CHANGETIME, null, 3, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 1)
+                sendHandler(GameMoves.CHANGETIME, null, 2, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 0)
+                sendHandler(GameMoves.CHANGETIME, null, 1, 0);
+        }
+        sendHandler(GameMoves.CHANGETIME, null, -1, 0);
         MakeMove makeMove = null;
         try {
             if(getX1() == -1 || getY1() == -1 || getX2() == -1 || getY2() == -1)
@@ -401,8 +402,6 @@ public class GameActivity extends AppCompatActivity {
                         }
                     }
                     max++;
-                    a = buttonArray[x1][y1];
-                    b = buttonArray[x2][y2];
                     if(x1 != x2)
                         if(y1 != y2)
                             if(buttonArray[x1][y1] != null)
@@ -410,10 +409,6 @@ public class GameActivity extends AppCompatActivity {
                                     break;;
 
                 }while(true);
-                if(a == null)
-                    a = b;
-                if(b == null)
-                    a = b;
                 makeMove = WebAPI.makeMove(player, gameId, x1, y1, x2, y2);
             }
             else

@@ -2,6 +2,9 @@ package game.java.memory;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -13,13 +16,17 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import org.json.JSONException;
+
+import java.util.concurrent.ExecutionException;
+
+import game.java.memory.containers.MakeMove;
 
 public class GameActivity extends AppCompatActivity {
 
-    public enum GameMoves { MOVE, STOPMOVE, CHANGETIME }
+    public enum GameMoves { MOVE, STOPMOVE, CHANGETIME, TURA }
 
-    private ArrayList<Button> txt = new ArrayList<Button>();
+    Button[][] buttonArray;
     private static TableLayout tl;
     private static TextView tura;
     private static TextView yourScore;
@@ -27,11 +34,13 @@ public class GameActivity extends AppCompatActivity {
     private static TextView time;
 
     private boolean chanegePosition;
-    private int x;
-    private int y;
+    private int x1;
+    private int y1;
+    private int x2;
+    private int y2;
 
     boolean endGame = false;
-    int id;
+    int gameId;
     int player;
     Thread game = null;
 
@@ -42,13 +51,13 @@ public class GameActivity extends AppCompatActivity {
 
         Bundle b = getIntent().getExtras();
         if(b != null) {
-            id = b.getInt("gameId");
+            gameId = b.getInt("gameId");
             player = b.getInt("player");
         }
 
         chanegePosition = false;
-        x = -1;
-        y = -1;
+        x1 = -1;
+        y1 = -1;
 
         tura = (TextView)findViewById(R.id.tura);
         yourScore = (TextView)findViewById(R.id.your_score);
@@ -58,6 +67,7 @@ public class GameActivity extends AppCompatActivity {
         TableRow.LayoutParams lp = new TableRow.LayoutParams(1,android.widget.TableRow.LayoutParams.MATCH_PARENT,1f);
         Button btn;
         tl = (TableLayout) findViewById(R.id.map);
+        buttonArray = new Button[6][6];
         for (Integer y = 0; y < 6; y++) {
             TableRow row = new TableRow(this);
             for (Integer x = 0; x< 6; x++) {
@@ -65,7 +75,7 @@ public class GameActivity extends AppCompatActivity {
                 btn.setLayoutParams(lp);
                 setOnClick(btn, x, y);
                 row.addView(btn);
-                txt.add(btn);
+                buttonArray[x][y] = btn;
             }
             tl.addView(row);
         }
@@ -110,10 +120,27 @@ public class GameActivity extends AppCompatActivity {
         public void handleMessage(final Message msg) {
             if(msg.what== GameMoves.MOVE.ordinal())
             {
-
+                MakeMove makeMove = (MakeMove)msg.obj;
+                buttonArray[makeMove.x1][makeMove.y1].setText(Integer.toString(makeMove.value1));
+                buttonArray[makeMove.x2][makeMove.y2].setText(Integer.toString(makeMove.value2));
             }
             if(msg.what== GameMoves.STOPMOVE.ordinal())
             {
+                MakeMove makeMove = (MakeMove)msg.obj;
+                Button btn1 = buttonArray[makeMove.x1][makeMove.y1];
+                Button btn2 = buttonArray[makeMove.x2][makeMove.y2];
+                btn1.getBackground().clearColorFilter();
+                btn2.getBackground().clearColorFilter();
+                if(btn1.getText().equals(btn2.getText()))
+                {
+                    buttonArray[makeMove.x1][makeMove.y1] = null;
+                    buttonArray[makeMove.x2][makeMove.y2] = null;
+                }
+                else
+                {
+                    btn1.setText("");
+                    btn2.setText("");
+                }
 
             }
             if(msg.what== GameMoves.CHANGETIME.ordinal())
@@ -141,11 +168,19 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(isChanegePosition()) {
-                    setX(x);
-                    setY(y);
-                    Toast.makeText(getBaseContext(),x + " " + y, Toast.LENGTH_LONG).show();
+                    if(buttonArray[x][y] != null) {
+                        if (getX1() == -1) {
+                            setX1(x);
+                            setY1(y);
+                            buttonArray[x][y].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+                        } else {
+                            setX2(x);
+                            setY2(y);
+                            setChanegePosition(false);
+                            buttonArray[x][y].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+                        }
+                    }
                 }
-                setChanegePosition(false);
             }
         });
     }
@@ -166,11 +201,11 @@ public class GameActivity extends AppCompatActivity {
     {
         //GetNotShownMoves/{gameId}
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private long countTimeElapsed(long startTime) {
@@ -178,39 +213,80 @@ public class GameActivity extends AppCompatActivity {
         return a/1000;
     }
 
-    private void makeMove()
-    {
+    private void makeMove() {
         Long startTime = System.currentTimeMillis();
         setChanegePosition(true);
-        while (countTimeElapsed(startTime) < 5)
-        {
-            if((5-countTimeElapsed(startTime)) > 4) sendHandler(GameMoves.CHANGETIME, null, 5, 0);
-            else if((5-countTimeElapsed(startTime)) > 3) sendHandler(GameMoves.CHANGETIME, null, 4, 0);
-            else if((5-countTimeElapsed(startTime)) > 2) sendHandler(GameMoves.CHANGETIME, null, 3, 0);
-            else if((5-countTimeElapsed(startTime)) > 1) sendHandler(GameMoves.CHANGETIME, null, 2, 0);
-            else if((5-countTimeElapsed(startTime)) > 0) sendHandler(GameMoves.CHANGETIME, null, 1, 0);
+        while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
+            if ((5 - countTimeElapsed(startTime)) > 4)
+                sendHandler(GameMoves.CHANGETIME, null, 5, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 3)
+                sendHandler(GameMoves.CHANGETIME, null, 4, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 2)
+                sendHandler(GameMoves.CHANGETIME, null, 3, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 1)
+                sendHandler(GameMoves.CHANGETIME, null, 2, 0);
+            else if ((5 - countTimeElapsed(startTime)) > 0)
+                sendHandler(GameMoves.CHANGETIME, null, 1, 0);
         }
         sendHandler(GameMoves.CHANGETIME, null, -1, 0);
-        //wysylanie
+        MakeMove makeMove = null;
+        try {
+            makeMove = WebAPI.makeMove(player, gameId, getX1(), getY1(), getX2(), getY2());
+            sendHandler(GameMoves.MOVE, makeMove, 0, 0);
+            Thread.sleep(5000);
+            sendHandler(GameMoves.STOPMOVE, makeMove, 0, 0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         setChanegePosition(false);
-        setX(-1);
-        setY(-1);
+        setX1(-1);
+        setY1(-1);
+        setX2(-1);
+        setY2(-1);
+        if (false)//GetActivePlayer/{gameId} == player
+        {
+            makeMove();
+        }
+        else
+        {
+            sendHandler(GameMoves.TURA, null, player, 0);
+        }
     }
 
-    public synchronized int getY() {
-        return y;
+    public synchronized int getY1() {
+        return y1;
     }
 
-    public synchronized void setY(int y) {
-        this.y = y;
+    public synchronized void setY1(int y) {
+        this.y1 = y;
     }
 
-    public synchronized int getX() {
-        return x;
+    public synchronized int getX1() {
+        return x1;
     }
 
-    public synchronized void setX(int x) {
-        this.x = x;
+    public synchronized void setX1(int x) {
+        this.x1 = x;
+    }
+
+    public synchronized int getY2() {
+        return y2;
+    }
+
+    public synchronized void setY2(int y2) {
+        this.y2 = y2;
+    }
+
+    public synchronized int getX2() {
+        return x2;
+    }
+
+    public synchronized void setX2(int x2) {
+        this.x2 = x2;
     }
 
     public synchronized boolean isChanegePosition() {

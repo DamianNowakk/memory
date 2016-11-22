@@ -39,21 +39,21 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         OnClickButtonListener();
         OnClickEditTextListener();
-        try {
-            GetGame getGame = WebAPI.getGame(1);
-            GetGameScore getGameScore = WebAPI.getGameScore(1);
-            MakeMove makeMove = WebAPI.makeMove(1,1,1,1,1,1);
-            TextView textView = (TextView)findViewById(R.id.textView2);
-            textView.append(getGame.toString() + "\n");
-            textView.append(getGameScore.toString() + "\n");
-            textView.append(makeMove.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            GetGame getGame = WebAPI.getGame(1);
+//            GetGameScore getGameScore = WebAPI.getGameScore(1);
+//            MakeMove makeMove = WebAPI.makeMove(1,1,1,1,1,1);
+//            TextView textView = (TextView)findViewById(R.id.textView2);
+//            textView.append(getGame.toString() + "\n");
+//            textView.append(getGameScore.toString() + "\n");
+//            textView.append(makeMove.toString());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private class AsyncCaller extends AsyncTask<String, Void, JSONObject>
@@ -136,10 +136,20 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        GetGame getGame = null;
+                        try {
+                            getGame = WebAPI.getGame(1);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         Intent intent = new Intent("game.java.memory.GameActivity");
                         Bundle b = new Bundle();
-                        b.putInt("gameId", 1); //TO DO trzeba tu dac zmienna która przechowuje id gry   obie te watosci otrzymujemy z GetGame/
-                        b.putInt("player", 1); // tutaj dac zmienna jakim playerem jestemy 1 czy 2
+                        b.putInt("gameId", getGame.gameId);
+                        b.putInt("player", getGame.playerNumber);
                         intent.putExtras(b);
                         startActivity(intent);
                     }

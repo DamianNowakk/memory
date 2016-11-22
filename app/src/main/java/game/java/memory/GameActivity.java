@@ -49,6 +49,12 @@ public class GameActivity extends AppCompatActivity {
     private int x2;
     private int y2;
 
+    private int mx1;
+    private int my1;
+
+    private int scorePlayer1;
+    private int scorePlayer2;
+
     boolean endGame = false;
     int gameId;
     int player;
@@ -66,8 +72,15 @@ public class GameActivity extends AppCompatActivity {
         }
 
         chanegePosition = false;
+
+        scorePlayer1 = 0;
+        scorePlayer2 = 0;
         x1 = -1;
         y1 = -1;
+        x2 = -1;
+        y2 = -1;
+        mx1 = -1;
+        my1 = -1;
 
         tura = (TextView)findViewById(R.id.tura);
         yourScore = (TextView)findViewById(R.id.your_score);
@@ -131,10 +144,17 @@ public class GameActivity extends AppCompatActivity {
             if(msg.what== GameMoves.MOVE.ordinal())
             {
                 MakeMove makeMove = (MakeMove)msg.obj;
+                if(mx1 != -1 && my1 != -1)
+                {
+                    buttonArray[mx1][my1].getBackground().clearColorFilter();
+                    mx1 = -1;
+                    my1 = -1;
+                }
                 buttonArray[makeMove.x1][makeMove.y1].setText(Integer.toString(makeMove.value1));
                 buttonArray[makeMove.x2][makeMove.y2].setText(Integer.toString(makeMove.value2));
                 buttonArray[makeMove.x1][makeMove.y1].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
                 buttonArray[makeMove.x2][makeMove.y2].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+
             }
             if(msg.what== GameMoves.STOPMOVE.ordinal())
             {
@@ -145,6 +165,14 @@ public class GameActivity extends AppCompatActivity {
                 btn2.getBackground().clearColorFilter();
                 if(btn1.getText().equals(btn2.getText()))
                 {
+                    if(player == 1) {
+                        setScorePlayer1(getScorePlayer1() + 1);
+                        yourScore.setText(Integer.toString(getScorePlayer2()));
+                    }
+                    else {
+                        setScorePlayer2(getScorePlayer2() + 1);
+                        oppScore.setText(Integer.toString(getScorePlayer1()));
+                    }
                     buttonArray[makeMove.x1][makeMove.y1] = null;
                     buttonArray[makeMove.x2][makeMove.y2] = null;
                 }
@@ -172,6 +200,14 @@ public class GameActivity extends AppCompatActivity {
                 btn2.getBackground().clearColorFilter();
                 if(btn1.getText().equals(btn2.getText()))
                 {
+                    if(player == 2) {
+                        setScorePlayer1(getScorePlayer1() + 1);
+                        yourScore.setText(Integer.toString(getScorePlayer2()));
+                    }
+                    else {
+                        setScorePlayer2(getScorePlayer2() + 1);
+                        oppScore.setText(Integer.toString(getScorePlayer1()));
+                    }
                     buttonArray[makeMove.x1][makeMove.y1] = null;
                     buttonArray[makeMove.x2][makeMove.y2] = null;
                 }
@@ -202,45 +238,63 @@ public class GameActivity extends AppCompatActivity {
             }
             if(msg.what== GameMoves.SCORE.ordinal())
             {
-                if(msg.arg1 == player)
-                {
-                    yourScore.setText(Integer.toString(msg.arg1));
-                    oppScore.setText(Integer.toString(msg.arg2));
-                }
-                else
-                {
-                    yourScore.setText(Integer.toString(msg.arg2));
-                    oppScore.setText(Integer.toString(msg.arg1));
-                }
+//                if(msg.arg1 == player)
+//                {
+//                    yourScore.setText(Integer.toString(msg.arg1));
+//                    oppScore.setText(Integer.toString(msg.arg2));
+//                }
+//                else
+//                {
+//                    yourScore.setText(Integer.toString(msg.arg2));
+//                    oppScore.setText(Integer.toString(msg.arg1));
+//                }
             }
             if(msg.what== GameMoves.END.ordinal())
             {
-                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which){
-                            case DialogInterface.BUTTON_POSITIVE:
-                                exit();
-                                break;
-                        }
-                    }
-                };
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                if(Integer.getInteger(yourScore.getText().toString()) > Integer.getInteger(oppScore.getText().toString()))
+                int yscore, opscore;
+                if(player == 1)
                 {
-                    builder.setMessage("You win").setPositiveButton("Ok", dialogClickListener).show();
-                }
-                else if(Integer.getInteger(yourScore.getText().toString()) < Integer.getInteger(oppScore.getText().toString()))
-                {
-                    builder.setMessage("You lose").setPositiveButton("Ok", dialogClickListener).show();
+                    yscore = getScorePlayer1();
+                    opscore = getScorePlayer2();
                 }
                 else
                 {
-                    builder.setMessage("draw").setPositiveButton("Ok", dialogClickListener).show();
+                    yscore = getScorePlayer2();
+                    opscore = getScorePlayer1();
+                }
+
+
+                if(yscore > opscore)
+                {
+                    end("you win!!!", "OK");
+                }
+                else if(yscore < opscore)
+                {
+                    end("you lose", "OK");
+                }
+                else
+                {
+                    end("draw", "OK");
                 }
             }
         }
     };
+    private void end(String text, String text1)
+    {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        exit();
+                        finish();
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(text).setPositiveButton(text1, dialogClickListener).show();
+    }
 
     private void sendHandler(GameMoves gameMoves, Object obj, int arg1, int arg2)
     {
@@ -261,6 +315,8 @@ public class GameActivity extends AppCompatActivity {
                         if (getX1() == -1) {
                             setX1(x);
                             setY1(y);
+                            mx1 = x;
+                            my1 = y;
                             buttonArray[x][y].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
                         } else {
                             setX2(x);
@@ -298,16 +354,17 @@ public class GameActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(getActivePlayer.playerID == player)//getActivePlayer.playerID == player
-            {
-                showOppMove();
-                makeMove();
-            }
-            else if(getActivePlayer.playerID == 0)
+            showOppMove();
+            if(true)//getActivePlayer.playerID == 0 getScorePlayer1() + getScorePlayer2() == 18
             {
                 sendHandler(GameMoves.END, null, 0, 0);
                 break;
             }
+            if(getActivePlayer.playerID == player)//getActivePlayer.playerID == player
+            {
+                makeMove();
+            }
+
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -352,7 +409,6 @@ public class GameActivity extends AppCompatActivity {
 
     private void makeMove() {
         sendHandler(GameMoves.TURA, null, player, 0);
-
         Long startTime = System.currentTimeMillis();
         setChanegePosition(true);
         while (countTimeElapsed(startTime) < 5 && isChanegePosition()) {
@@ -456,6 +512,8 @@ public class GameActivity extends AppCompatActivity {
         sendHandler(GameMoves.SCORE, null, getGameScore.player1Score, getGameScore.player2Score);
         if (getActivePlayer.playerID == player)
         {
+            if(getScorePlayer1() + getScorePlayer2() == 18)//getActivePlayer.playerID == 0
+                return;
             makeMove();
         }
         else
@@ -496,6 +554,22 @@ public class GameActivity extends AppCompatActivity {
         this.x2 = x2;
     }
 
+    public synchronized int getScorePlayer2() {
+        return scorePlayer2;
+    }
+
+    public synchronized void setScorePlayer2(int scorePlayer2) {
+        this.scorePlayer2 = scorePlayer2;
+    }
+
+    public synchronized int getScorePlayer1() {
+        return scorePlayer1;
+    }
+
+    public synchronized void setScorePlayer1(int scorePlayer1) {
+        this.scorePlayer1 = scorePlayer1;
+    }
+
     public synchronized boolean isChanegePosition() {
         return chanegePosition;
     }
@@ -503,4 +577,6 @@ public class GameActivity extends AppCompatActivity {
     public synchronized void setChanegePosition(boolean chanegePosition) {
         this.chanegePosition = chanegePosition;
     }
+
+
 }

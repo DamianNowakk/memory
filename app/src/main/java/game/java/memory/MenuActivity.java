@@ -70,6 +70,16 @@ public class MenuActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        EditText ip = (EditText) findViewById(R.id.IP);
+                        EditText port = (EditText) findViewById(R.id.PORT);
+                        WebAPI.setHome(ip.getText() + ":" + port.getText());
+                        Log.d("Stworzone ip: ", WebAPI.HOME);
+                        Log.d("Stworzone ip: ", WebAPI.GETGAME);
+                        Log.d("Stworzone ip: ", WebAPI.GETACTIVEPLAYER);
+                        Log.d("Stworzone ip: ", WebAPI.GETGAMESCORE);
+                        Log.d("Stworzone ip: ", WebAPI.GETNOTSHOWNMOVES);
+                        Log.d("Stworzone ip: ", WebAPI.MAKEMOVE);
+
                         getGame = null;
                         String login = editLogin.getText().toString();
                         if (login.trim().length() > 0) {

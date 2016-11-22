@@ -22,11 +22,11 @@ public class WebAPI {
 
     public static String IP = "";
     public static String HOME = "http://"+"/MemoryService_war_exploded/MemoryService/";
-    private static String GETGAME = HOME + "GetGame";
-    private static String GETACTIVEPLAYER = HOME + "GetActivePlayer";
-    private static String GETGAMESCORE = HOME + "GetGameScore";
-    private static String GETNOTSHOWNMOVES = HOME + "GetNotShownMoves";
-    private static String MAKEMOVE = HOME + "MakeMove";
+    public static String GETGAME = HOME + "GetGame";
+    public static String GETACTIVEPLAYER = HOME + "GetActivePlayer";
+    public static String GETGAMESCORE = HOME + "GetGameScore";
+    public static String GETNOTSHOWNMOVES = HOME + "GetNotShownMoves";
+    public static String MAKEMOVE = HOME + "MakeMove";
 
     public static void setHome(String ip){
         HOME = "http://" + ip + "/MemoryService_war_exploded/MemoryService/";

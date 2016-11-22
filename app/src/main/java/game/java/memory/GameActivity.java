@@ -323,7 +323,7 @@ public class GameActivity extends AppCompatActivity {
                             mx1 = x;
                             my1 = y;
                             buttonArray[x][y].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
-                        } else {
+                        } else if(x != mx1 || y != my1){
                             setX2(x);
                             setY2(y);
                             setChanegePosition(false);
@@ -491,6 +491,8 @@ public class GameActivity extends AppCompatActivity {
             sendHandler(GameMoves.MOVE, makeMove, 0, 0);
             Thread.sleep(2000);
             sendHandler(GameMoves.STOPMOVE, makeMove, 0, 0);
+            Thread.sleep(200);
+
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

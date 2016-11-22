@@ -131,6 +131,8 @@ public class GameActivity extends AppCompatActivity {
                 MakeMove makeMove = (MakeMove)msg.obj;
                 buttonArray[makeMove.x1][makeMove.y1].setText(Integer.toString(makeMove.value1));
                 buttonArray[makeMove.x2][makeMove.y2].setText(Integer.toString(makeMove.value2));
+                buttonArray[makeMove.x1][makeMove.y1].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+                buttonArray[makeMove.x2][makeMove.y2].getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
             }
             if(msg.what== GameMoves.STOPMOVE.ordinal())
             {
@@ -156,7 +158,7 @@ public class GameActivity extends AppCompatActivity {
                 GetNoShownMoves makeMove = (GetNoShownMoves)msg.obj;
                 buttonArray[makeMove.x1][makeMove.y1].setText(Integer.toString(makeMove.value1));
                 buttonArray[makeMove.x2][makeMove.y2].setText(Integer.toString(makeMove.value2));
-                buttonArray[makeMove.x1][makeMove.y2].getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
+                buttonArray[makeMove.x1][makeMove.y1].getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
                 buttonArray[makeMove.x2][makeMove.y2].getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.MULTIPLY);
             }
             if(msg.what== GameMoves.STOPMOVEOPP.ordinal())
@@ -321,13 +323,13 @@ public class GameActivity extends AppCompatActivity {
         for(int i = 0; i < getNoShownMovesList.size(); i++)
         {
             getNoShownMoves = getNoShownMovesList.get(i);
-            sendHandler(GameMoves.MOVE, getNoShownMoves, 0, 0);
+            sendHandler(GameMoves.MOVEOPP, getNoShownMoves, 0, 0);
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            sendHandler(GameMoves.STOPMOVE, getNoShownMoves, 0, 0);
+            sendHandler(GameMoves.STOPMOVEOPP, getNoShownMoves, 0, 0);
         }
         sendHandler(GameMoves.SCORE, null, getGameScore.player1Score, getGameScore.player2Score);
     }

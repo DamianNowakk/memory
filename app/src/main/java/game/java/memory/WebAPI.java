@@ -27,6 +27,7 @@ public class WebAPI {
     public static String GETGAMESCORE = HOME + "GetGameScore";
     public static String GETNOTSHOWNMOVES = HOME + "GetNotShownMoves";
     public static String MAKEMOVE = HOME + "MakeMove";
+    public static String SURRENDERGAME = HOME + "SurrenderGame";
 
     public static void setHome(String ip){
         HOME = "http://" + ip + "/MemoryService_war_exploded/MemoryService/";
@@ -47,6 +48,16 @@ public class WebAPI {
         JSONObject returnedValues = new AsyncCaller().execute(GETGAMESCORE, String.valueOf(gameId)).get();
         GetGameScore getGameScore = new GetGameScore(returnedValues.getInt(GetGameScore.PLAYER1SCORE),returnedValues.getInt(GetGameScore.PLAYER2SCORE));
         return getGameScore;
+    }
+
+    public static void SurrenderGame(int userId, int gameId) {
+        try {
+            new AsyncCaller().execute(SURRENDERGAME, String.valueOf(userId), String.valueOf(gameId)).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public static MakeMove makeMove(int userId, int gameId, int x1, int y1, int x2, int y2) throws JSONException, ExecutionException, InterruptedException {
